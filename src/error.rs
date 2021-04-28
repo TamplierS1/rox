@@ -2,7 +2,6 @@ pub mod err
 {
     use std::fmt::{self, Formatter};
     use std::io::{self, Write};
-    use std::process::exit;
 
     #[derive(Debug)]
     pub enum Error
@@ -16,8 +15,6 @@ pub mod err
         // This function should not return anything,
         // that's why I'm using unwrap() here
         write!(io::stderr(), "{}\n", error).unwrap();
-        // TODO: do something nicer instead of dying immediately
-        exit(65);
     }
 
     impl fmt::Display for Error
