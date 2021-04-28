@@ -23,12 +23,34 @@ impl fmt::Display for Value
     }
 }
 
+macro_rules! arithmetic_op_impl {
+    ($op:ident, $err_msg:literal) => {
+        type Output = Self;
+
+        fn $op(self, rhs: Self) -> Self::Output
+        {
+            if let Value::Double(rhs) = rhs
+            {
+                return match self
+                {
+                    Value::Double(value) => Value::Double(rhs.$op(value)),
+                };
+            }
+
+            err::error(err::Error::RuntimeError($err_msg.to_string()));
+
+            Value::Double(0.0)
+        }
+    };
+}
+
 impl Add for Value
 {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output
     {
+        // TODO: Add strings concatenation here later
         if let Value::Double(rhs) = rhs
         {
             return match self
@@ -41,74 +63,23 @@ impl Add for Value
             "only numbers can be added together.".to_string(),
         ));
 
-        unreachable!()
+        Value::Double(0.0)
     }
 }
 
 impl Sub for Value
 {
-    type Output = Self;
-
-    fn sub(self, rhs: Self) -> Self::Output
-    {
-        if let Value::Double(rhs) = rhs
-        {
-            return match self
-            {
-                Value::Double(value) => Value::Double(rhs - value),
-            };
-        }
-
-        err::error(err::Error::RuntimeError(
-            "only numbers can be subtracted.".to_string(),
-        ));
-
-        unreachable!()
-    }
+    arithmetic_op_impl!(sub, "only numbers can be subtracted.");
 }
 
 impl Mul for Value
 {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output
-    {
-        if let Value::Double(rhs) = rhs
-        {
-            return match self
-            {
-                Value::Double(value) => Value::Double(rhs * value),
-            };
-        }
-
-        err::error(err::Error::RuntimeError(
-            "only numbers can be multiplied together.".to_string(),
-        ));
-
-        unreachable!()
-    }
+    arithmetic_op_impl!(mul, "only numbers can be multiplied together.");
 }
 
 impl Div for Value
 {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output
-    {
-        if let Value::Double(rhs) = rhs
-        {
-            return match self
-            {
-                Value::Double(value) => Value::Double(rhs / value),
-            };
-        }
-
-        err::error(err::Error::RuntimeError(
-            "only numbers can be divided.".to_string(),
-        ));
-
-        unreachable!()
-    }
+    arithmetic_op_impl!(div, "only numbers can be divided together.");
 }
 
 impl Neg for Value
@@ -126,7 +97,7 @@ impl Neg for Value
                     "only numbers can be negated.".to_string(),
                 ));
 
-                unreachable!()
+                Value::Double(0.0)
             }
         }
     }
